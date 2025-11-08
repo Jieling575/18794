@@ -1,0 +1,168 @@
+================================================================================
+  UPLOAD PROJECT TO GITHUB - QUICK GUIDE
+================================================================================
+
+GOAL: Put your code on GitHub so you can easily clone it on AWS
+
+================================================================================
+OPTION 1: EASIEST WAY (GitHub Desktop)
+================================================================================
+
+1. Download GitHub Desktop: https://desktop.github.com/
+2. Install and sign in
+3. File → New Repository
+   - Name: 18794-HW3-DeepLab
+   - Path: C:\Users\HP\Desktop\18794_HW3_F25\hw3_semantic_segmentation
+4. Commit all files (bottom left)
+5. Click "Publish repository"
+
+Done! Your code is at: github.com/YOUR_USERNAME/18794-HW3-DeepLab
+
+================================================================================
+OPTION 2: AUTOMATED SCRIPT (Windows)
+================================================================================
+
+1. Create empty repository on GitHub.com first:
+   - Go to https://github.com
+   - Click "+" → "New repository"
+   - Name: 18794-HW3-DeepLab
+   - DON'T check "Initialize with README"
+   - Click "Create repository"
+
+2. Double-click: setup_git.bat
+3. Follow the prompts
+4. Enter your GitHub username and Personal Access Token when asked
+
+Done!
+
+================================================================================
+OPTION 3: MANUAL (Command Line)
+================================================================================
+
+PowerShell:
+  cd C:\Users\HP\Desktop\18794_HW3_F25\hw3_semantic_segmentation
+  
+  git init
+  git add .
+  git commit -m "Initial commit"
+  git remote add origin https://github.com/YOUR_USERNAME/18794-HW3-DeepLab.git
+  git branch -M main
+  git push -u origin main
+
+================================================================================
+USING YOUR GITHUB REPO ON AWS
+================================================================================
+
+After your code is on GitHub, on AWS it's super simple:
+
+  # Clone your repository
+  git clone https://github.com/YOUR_USERNAME/18794-HW3-DeepLab.git
+  cd 18794-HW3-DeepLab
+  
+  # Activate PyTorch
+  source activate pytorch_p38
+  
+  # Install packages
+  pip install -r requirements.txt
+  
+  # Download dataset
+  mkdir -p datasets/data
+  cd datasets/data
+  wget http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
+  tar -xf VOCtrainval_11-May-2012.tar
+  mkdir -p VOC2012_train_val
+  mv VOCdevkit/VOC2012 VOC2012_train_val/VOC2012_train_val
+  
+  # Train
+  cd ~/18794-HW3-DeepLab
+  python main.py --model deeplabv3plus_resnet50 --output_stride 16 --batch_size 8 --lr 0.01 --lr_policy step --step_size 1000 --total_itrs 5000 --gpu_id 0
+
+================================================================================
+WHAT GETS UPLOADED?
+================================================================================
+
+✅ YES - Uploaded to GitHub:
+  - All .py files
+  - network/, metrics/, utils/ folders
+  - requirements.txt, README.md
+
+❌ NO - Not uploaded (too large):
+  - datasets/data/ folder (download separately on AWS)
+  - checkpoints/ folder
+  - *.pth model files
+  - *.log files
+
+This keeps your GitHub repo small and fast!
+
+================================================================================
+NEED A PERSONAL ACCESS TOKEN?
+================================================================================
+
+GitHub no longer accepts passwords for command-line access.
+You need a Personal Access Token:
+
+1. Go to: https://github.com/settings/tokens
+2. Click "Generate new token" → "Generate new token (classic)"
+3. Name it: "HW3 Upload"
+4. Check: "repo" (all repo permissions)
+5. Click "Generate token"
+6. COPY THE TOKEN - you can't see it again!
+7. Use this token as your password when pushing
+
+================================================================================
+MAKE REPOSITORY PRIVATE
+================================================================================
+
+For homework, you should make it private:
+
+1. Go to your repo on GitHub
+2. Settings → Scroll down → Change repository visibility
+3. Make private
+
+To share with instructor:
+  Settings → Collaborators → Add people → Enter their username
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Problem: "git: command not found"
+Solution: Install Git from https://git-scm.com/download/win
+
+Problem: "Permission denied"
+Solution: Use Personal Access Token (not password) - see above
+
+Problem: "Repository not found"
+Solution: Create the repository on GitHub.com first
+
+Problem: Files too large (>100MB)
+Solution: Check .gitignore is working. Dataset should NOT be uploaded.
+
+================================================================================
+QUICK COMMANDS REFERENCE
+================================================================================
+
+Check what will be committed:
+  git status
+
+Add all changes:
+  git add .
+
+Commit:
+  git commit -m "Your message"
+
+Push to GitHub:
+  git push
+
+Clone from GitHub:
+  git clone https://github.com/USERNAME/REPO.git
+
+View remote:
+  git remote -v
+
+================================================================================
+
+For detailed instructions, see GITHUB_SETUP.md
+
+Good luck! 🚀
+

@@ -1,0 +1,167 @@
+\documentclass[fullpage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+%\usepackage{algorithmic}
+%\usepackage{algorithm}
+%\usepackage{latexsym}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{dsfont}
+\usepackage{url}
+\usepackage{comment}
+\usepackage[tight]{subfigure}
+\usepackage{color}
+\usepackage[small]{caption}
+\usepackage{subfigure}
+\usepackage{amsthm}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage[export]{adjustbox}
+\usepackage[many]{tcolorbox}
+\usepackage{lipsum}
+\usepackage[explicit]{titlesec}
+\usepackage{bm}
+\usepackage{graphicx}
+\titleformat{\section}[hang]{\normalfont\Large\bfseries}{Problem \thesection: #1}{0pt}{}
+
+\renewenvironment{comment}{}{} % comment this line to hide solutions
+
+\def\argmin{\operatornamewithlimits{arg\,min}}
+\def\argmax{\operatornamewithlimits{arg\,max}}
+\def\minimize{\operatornamewithlimits{minimize}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\expectation}[1]{\mathbb{E}\left[#1\right]}
+\newtcbtheorem[]{solution}{Solution}{breakable, fonttitle=\bfseries}{x}
+\newtcbtheorem[]{instruction}{Instruction}{breakable, fonttitle=\bfseries}{x}
+
+
+
+%-----------------------------------------------------------------------
+
+\begin{document}
+\begin{center}
+    \textsc{\LARGE 18-794: Introduction to Deep Learning and Pattern Recognition for Computer Vision} \\
+    \vspace{1em}
+    \textsc{\large Assignment 3: Semantic Segmentation} \\
+    \vspace{0.5em}
+    \textsc{\large Instructor: Marios Savvides} \\
+    \vspace{0.5em}
+    \textsc{TAs: Zhantao Yang, Alex Liao, Pradhumna Guru Prasad, Hrishikesh Gokhale, Sarah Alharbi} \\
+    \vspace{0.5em}
+    \textbf{Due Date:} Tuesday, Nov. 7, 2025 11:59 pm \\
+    \vspace{0.5em}
+    \textbf{Total Points:} 100 \\
+    \vspace{0.5em}
+    \textbf{Submission:} Submit your solutions, code and pdfs on Gradescope.
+\end{center}
+
+\begin{itemize}
+\item \textbf{Collaboration policy:} All are encouraged to work together BUT you must do your own work (code and write up). If you work with someone, please include their name in your write-up and cite any code that has been discussed. If we find highly identical write-ups or code or lack of proper accreditation of collaborators, we will take action according to strict university policies. See the \href{hhttps://www.cmu.edu/policies/student-and-student-life/academic-integrity.html}{Academic Integrity Section} detailed in the initial lecture for more information. Cases of exact same code submissions will be reported instantly.  
+
+\item\textbf{Late Submission Policy:} You have a total of \textbf{5 late homework days} without penalty for the entire semester. You can use up to three days on one homework or one day on 4 different homeworks. You cannot use half-days or any other fractions. After you’ve used all your late days, your homework will be worth half credit if it is up to 24 hours late, and worth zero credit after that with NO exceptions.
+
+\item\textbf{Submitting your work:}
+
+\begin{itemize}
+
+\item We will be using Gradescope (\url{https://gradescope.com/}) to submit the Problem Sets. Please use the provided template only. Submissions must be written in LaTeX. All submissions not adhering to the template will not be graded and receive a zero. 
+\item \textbf{Deliverables:} Please \textbf{complete all TODOs and missing codes}, and submit all the \texttt{.py} and \texttt{.ipynb} files. Add all relevant plots and text answers in the boxes provided in this file. To include plots you can simply modify the already provided latex code. Submit the compiled \texttt{.pdf} report as well.
+\end{itemize}
+\end{itemize}
+\emph{NOTE: Partial points will be given for implementing parts of the homework even if you don't get the mentioned numbers as long as you include partial results in this pdf.}
+
+\section{Prepare Data Pipeline (20pts)}
+\label{q:Corr}
+Finish data pipeline code for training and evaluation. \\
+
+1. (5pts) In \textit{datasets\slash voc.py}, complete the \textit{VOCSegmentation} class. Specifically, please finish the \textit{\_\_getitem()\_\_} method and  \textit{decode\_target} method.  \\
+
+2. (5pts) How many categories are there in the dataset? In the training set, do you think this is a class-balanced set? And what can be the potential challenges while training a model on this dataset? \\
+\begin{comment} 
+\begin{tcolorbox}[fit, blank, height=2cm, borderline={1pt}{-2pt}]
+        \end{tcolorbox}
+\end{comment}
+3. (5pts) Semantic Segmentation utilizes Accuracy and Mean IoU as evaluation metrics. Can you give an example to show why mIoU is a better metric than accuracy? \\
+\begin{comment}
+\begin{tcolorbox}[fit, blank, height=2cm, borderline={1pt}{-2pt}]
+        \end{tcolorbox}
+\end{comment}
+4. (5pts) Pick one training image for each category. Plot the ground truth segmentation annotations (segmentation masks) side-by-side with the training images and show them in your report. Show your results as a large picture with 10 images per row. An example pair is giving for reference. \\
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{sampleimage.png}
+\end{figure}
+
+\begin{comment} % change the height of the box if necessary
+\begin{tcolorbox}[fit, blank, height=10cm, borderline={1pt}{-2pt}]
+        \end{tcolorbox}
+% \includegraphics{}
+\end{comment}
+
+
+\section{Build Segmentation Network (30 pts)}
+\label{q:LDA}
+Please read the original \href{https://arxiv.org/pdf/1706.05587.pdf}{DeepLabV3} and  \href{https://arxiv.org/pdf/1802.02611.pdf}{DeepLabV3+} paper and implement the networks. \\
+
+1. (15pts) In network\slash\_deeplab.py, complete ASPPConv, ASPPPooling and ASPP. \\
+
+2. (15pts) Complete DeepLabHead \& DeepLabHeadPlus. What are their differences? Please write your understanding in the report.
+\begin{comment} 
+\begin{tcolorbox}[fit, blank, height=3cm, borderline={1pt}{-2pt}]
+        \end{tcolorbox}
+\end{comment}
+
+
+\section{Training and Evaluation (40 pts)}
+\label{q:SVM}
+In ``main.py`` file, please complete the training loop and train the networks. \\
+
+1. (5pts) Build the optimizer. Since we will be using an ImageNet pretrained ResNet, we want to scale down the learning rate on the \textit{\_\_backbone\_\_} component. Set up an optimizer such that the learning rate of the \textit{\_\_backbone\_\_} is 0.1x the main learning rate. \\
+
+2. (5pts) Build the learning rate scheduler. We will be using a step learning rate scheduler that reduce the learning rate by 0.1x every 1,000 iterations. \\
+
+3. (15pts) Train the DeepLabV3+ with resnet50 backbone (imagenet pretrained) on PascalVOC train split for 5k iteration, with \textit{CrossEntropyLoss}. Plot the evaluation mIOU with an interval of 1 epoch in your report. (You should be able to train the model with a batch size of 8. In our test run, GPU memory usage is 6861MB.) We require your best mIoU to be at least 65 (the settings we provided and described should be able to reach around 65-67) \\
+\begin{comment} 
+\begin{tcolorbox}[fit, blank, height=3cm, borderline={1pt}{-2pt}]
+        \end{tcolorbox}
+\end{comment}
+
+4. (10pts) Based on what you have learned in the dataset, train the same network using the same settings, but in this time, with a different loss function. Write your loss function in \textit{utils\slash loss.py}. \textbf{What loss function do you propose to use and why?} Plot the evaluation mIOU with an interval of 1 epoch in your report. Note that you are allowed to use torch.nn functions/modules, but you should add something beyond what is already implemented by torch.nn (Hint: What do you learn from the Detection assignment when it comes to class-imbalanced training?). You may not observe performance improvements or you may even see slight degradation, if this is the case, please explain why you think this happens.\\
+\begin{comment} 
+\begin{tcolorbox}[fit, blank, height=3cm, borderline={1pt}{-2pt}]
+        \end{tcolorbox}
+\end{comment}
+
+5. (5pts) For the trained models, report the best performances in terms of mIoU and accuracy for both models, and pick 5 images in problem 1, show the ground-truth vs both models' predictions side-by-side. There should be 4 columns, $\mid$ RGB Image $\mid$ Ground Truth Annotation $\mid$ Model1 Prediction $\mid$ Model2 Prediction $\mid$
+\begin{comment} 
+\begin{tcolorbox}[fit, blank, height=6cm, borderline={1pt}{-2pt}]
+        \end{tcolorbox}
+\end{comment}
+
+\section{Segment-Anything-Model (10pts)}
+\href{https://arxiv.org/abs/2304.02643}{Segment-Anything-Model}is recently proposed by Meta AI Research that produces complete high-quality object masks. Please follow the \href{https://github.com/facebookresearch/segment-anything}{[installation]} instruction, and download the pretrained model checkpoint. You can also modify the provided \href{https://colab.research.google.com/github/roboflow-ai/notebooks/blob/main/notebooks/how-to-segment-anything-with-sam.ipynb}{[Google Colab script]} as well to save some AWS credits.\\
+
+1. Run the model on the same 5 images in Problem 2.5 and append the SAM results as the 5th column. $\mid$ RGB Image $\mid$ Ground Truth Annotation $\mid$ Model1 Prediction $\mid$ Model2 Prediction $\mid$ SAM Prediction $\mid$. What do you think are the differences between semantic segmentation and SAM?
+
+\begin{comment} 
+\begin{tcolorbox}[fit, blank, height=8cm, borderline={1pt}{-2pt}]
+        \end{tcolorbox}
+\end{comment}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
