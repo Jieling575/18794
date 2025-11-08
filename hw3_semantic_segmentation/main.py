@@ -225,7 +225,7 @@ def main():
     if opts.lr_policy == 'step':
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 
                                                      step_size=opts.step_size, 
-                                                     gamma=0.1)
+                                                     gamma=0.9)
     else:
         scheduler = utils.PolyLR(optimizer, opts.total_itrs, power=0.9)
 
