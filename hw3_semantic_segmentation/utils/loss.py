@@ -48,6 +48,16 @@ class FocalLoss(nn.Module):
         Returns:
             Focal loss value
         """
+        N, C, H, W = inputs.shape
+        
+        # Create valid mask (pixels that are not ignore_index)
+        valid_mask = (targets != self.ignore_index).float()  # (N, H, W)
+        
+        # Clamp targets to valid range [0, C-1] for one_hot encoding
+        # Replace ignore_index with 0 temporarily (will be masked out later)
+        targets_clamped = targets.clone()
+        targets_clamped[targets == self.ignore_index] = 0
+        
         # Get cross entropy loss without reduction
         ce_loss = F.cross_entropy(inputs, targets, reduction='none', 
                                    ignore_index=self.ignore_index)
@@ -55,17 +65,15 @@ class FocalLoss(nn.Module):
         # Get probabilities from logits
         p = F.softmax(inputs, dim=1)  # (N, C, H, W)
         
-        # Get the probability of the true class for each pixel
-        # Gather the probabilities at the target indices
-        N, C, H, W = inputs.shape
-        targets_one_hot = F.one_hot(targets, num_classes=C)  # (N, H, W, C)
-        targets_one_hot = targets_one_hot.permute(0, 3, 1, 2).float()  # (N, C, H, W)
-        
-        # Handle ignore_index
-        valid_mask = (targets != self.ignore_index).float()  # (N, H, W)
+        # Gather the probabilities at the target indices using gather
+        # targets_clamped: (N, H, W) -> (N, 1, H, W)
+        targets_expanded = targets_clamped.unsqueeze(1)  # (N, 1, H, W)
         
         # Get probability of true class: p_t
-        p_t = (p * targets_one_hot).sum(dim=1)  # (N, H, W)
+        p_t = p.gather(1, targets_expanded).squeeze(1)  # (N, H, W)
+        
+        # For ignored pixels, set p_t to 1 to avoid numerical issues
+        p_t = torch.where(valid_mask.bool(), p_t, torch.ones_like(p_t))
         
         # Calculate focal weight: (1 - p_t)^gamma
         # This down-weights easy examples (high p_t) and focuses on hard ones (low p_t)
@@ -189,15 +197,19 @@ class DiceLoss(nn.Module):
         """
         N, C, H, W = inputs.shape
         
+        # Create mask for valid pixels first
+        valid_mask = (targets != self.ignore_index).unsqueeze(1).float()  # (N, 1, H, W)
+        
+        # Clamp targets to valid range [0, C-1]
+        targets_clamped = targets.clone()
+        targets_clamped[targets == self.ignore_index] = 0
+        
         # Get probabilities
         probs = F.softmax(inputs, dim=1)  # (N, C, H, W)
         
         # Convert targets to one-hot
-        targets_one_hot = F.one_hot(targets.clamp(0, C-1), num_classes=C)  # (N, H, W, C)
+        targets_one_hot = F.one_hot(targets_clamped, num_classes=C)  # (N, H, W, C)
         targets_one_hot = targets_one_hot.permute(0, 3, 1, 2).float()  # (N, C, H, W)
-        
-        # Create mask for valid pixels
-        valid_mask = (targets != self.ignore_index).unsqueeze(1).float()  # (N, 1, H, W)
         
         # Apply mask
         probs = probs * valid_mask
