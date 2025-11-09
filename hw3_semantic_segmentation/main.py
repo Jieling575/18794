@@ -62,7 +62,8 @@ def get_argparser():
     parser.add_argument("--continue_training", action='store_true', default=False)
 
     parser.add_argument("--loss_type", type=str, default='cross_entropy',
-                        choices=['cross_entropy'], help="You may add different loss types here")
+                        choices=['cross_entropy', 'focal_loss', 'weighted_focal_loss', 'dice_loss', 'combined_loss'], 
+                        help="Loss function type")
     parser.add_argument("--gpu_id", type=str, default='0',
                         help="GPU ID")
     parser.add_argument("--weight_decay", type=float, default=1e-4,
@@ -235,7 +236,17 @@ def main():
     # in 3.3, please use CrossEntropyLoss.
     # ignore_index=255 for VOC boundary pixels
     if opts.loss_type == 'cross_entropy':
-        criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='mean') 
+        criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='mean')
+    elif opts.loss_type == 'focal_loss':
+        criterion = utils.FocalLoss(alpha=0.25, gamma=2.0, ignore_index=255, reduction='mean')
+    elif opts.loss_type == 'weighted_focal_loss':
+        criterion = utils.WeightedFocalLoss(alpha=None, gamma=2.0, ignore_index=255, reduction='mean')
+    elif opts.loss_type == 'dice_loss':
+        criterion = utils.DiceLoss(smooth=1.0, ignore_index=255)
+    elif opts.loss_type == 'combined_loss':
+        criterion = utils.CombinedLoss(ce_weight=0.5, dice_weight=0.5, ignore_index=255)
+    else:
+        raise ValueError(f"Unknown loss type: {opts.loss_type}") 
     
     def save_ckpt(path):
         """ save current model
